@@ -31,7 +31,6 @@ class MP3(object):
 
         return selected
 
-    # http://180h.ysts8.com:8000/官场商战/官途/官途955.mp3
     def get_file_url(self, in_url):
         in_url = self.domain + in_url
         response = requests.get(in_url, headers=self.headers)
@@ -42,7 +41,6 @@ class MP3(object):
         return url
 
     def save_file(self, url, file_path='mp3'):
-        file_url = 'http://180h.ysts8.com:8000/' + url
         file_name = re.search('.*/(.*\.mp3$)', url)
         if str(file_name) != 'None':
             save_file_name = re.sub('/|\\\\', os.sep, file_path) + '/' + file_name.group(1)
@@ -50,7 +48,7 @@ class MP3(object):
                 if not os.path.exists(file_path):
                     os.makedirs(file_path)
 
-                r = requests.get(file_url)
+                r = requests.get(url)
                 with open(save_file_name, "wb") as code:
                     code.write(r.content)
 
@@ -59,13 +57,33 @@ class MP3(object):
             except Exception as e:
                 print('错误 ：', e)
 
+    def save_file2(self, url, file_name, file_path='mp3/'):
+        save_file_name = re.sub('/|\\\\', os.sep, file_path) + file_name
+        try:
+            if not os.path.exists(file_path):
+                os.makedirs(file_path)
+
+            r = requests.get(url)
+            with open(save_file_name, "wb") as code:
+                code.write(r.content)
+
+        except IOError as e:
+            print('文件操作失败', e)
+        except Exception as e:
+            print('错误 ：', e)
+
 
 mp3 = MP3()
-page_urls = mp3.get_url(mp3.main_url)
-for link in page_urls:
-    mp3_url = mp3.get_file_url(link)
-    mp3.save_file(mp3_url)
 
-# for index in range(1004, 1015):
-# file = 'http://180h.ysts8.com:8000/官场商战/官途/官途%d.mp3' % index
-# mp3.save_file(file)
+# 页面搜索链接下载
+# page_urls = mp3.get_url(mp3.main_url)
+# for link in page_urls:
+#     mp3_url = mp3.get_file_url(link)
+#     mp3.save_file(mp3_url)
+
+# 指定链接下载
+for index in range(1, 38):
+    file_name = "%03d" % index
+    save_file_name = "%02d" % index + '.萍踪侠影.mp3'
+    file = 'http://180j.ysts8.com:8000/其他评书/萍踪侠影/%s.mp3' % file_name
+    mp3.save_file2(file, save_file_name)
