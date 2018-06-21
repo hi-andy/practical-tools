@@ -20,7 +20,7 @@ else:
     data['kindle_version'] = '0'
 
 # 检查 Kindle 软件更新 URL
-url = 'https://www.amazon.cn/gp/help/customer/display.html/ref=hp_left_v4_sib?ie=UTF8&nodeId=201756220'
+url = 'https://www.amazon.cn/gp/help/customer/display.html?nodeId=201756220'
 
 r = requests.get(url)
 m = re.search('[\u4e00-\u9fa5]+([\d\.\d\.?]{3,11})', r.text)
