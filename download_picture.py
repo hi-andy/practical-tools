@@ -5,14 +5,28 @@ import urllib.request
 import bs4
 import requests
 
+headers = {
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.62 Safari/537.36"
+        }
 
-def get_urls(in_url):
+def get_url(in_url):
     response = requests.get(in_url)
     soup = bs4.BeautifulSoup(response.text, "html5lib")
     return [img.attrs.get('src') for img in soup.select('div.browse-listing img')]
 
 
-def save_img(img_url, file_path='book/img'):
+def get_url2(in_url):
+    try:
+        response = requests.get(in_url, headers=headers)
+        print(response.text)
+        soup = bs4.BeautifulSoup(response.text, "html5lib")
+        urls = [img for img in soup.select('div._wy _2j _wz img')]
+        return urls
+    except requests.exceptions.ConnectionError:
+        requests.status_code = "Connection refused"
+
+
+def save_img(img_url, file_path='images/'):
     # 获取图片原始文件名
     file_name = re.search('.*/(.*\.(png)|(jpg)|(gif))$', img_url)
     # 处理路径分割符
@@ -31,9 +45,10 @@ def save_img(img_url, file_path='book/img'):
             print('错误 ：', e)
 
 
-main_url = 'https://findicons.com/pack/2787/beautiful_flat_icons'
+main_url = 'https://www.pinterest.com/pin/511088257683635896/'
 
-urls = get_urls(main_url)
+urls = get_url2(main_url)
 
-for url in urls:
-    save_img(url)
+print(urls)
+# for url in urls:
+#     save_img(url)
