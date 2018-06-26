@@ -23,7 +23,7 @@ else:
 url = 'https://www.amazon.cn/gp/help/customer/display.html?nodeId=201756220'
 
 r = requests.get(url)
-m = re.search('[\u4e00-\u9fa5]+([\d\.\d\.?]{3,11})', r.text)
+m = re.search('下载软件更新([\d\.\d\.?]{3,11})', r.text)
 
 if str(m) != 'None':
     new_ver = m.group(1)
