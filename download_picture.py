@@ -1,11 +1,12 @@
 import os
-import re
-import urllib.request
-import time
 import random
+import re
+import time
+import urllib.request
 
 import bs4
 import requests
+
 
 def get_url(in_url):
     response = requests.get(in_url)
