@@ -4,15 +4,16 @@ import os
 import re
 import time
 
+import bs4
 import requests
+
 
 # 显示进度下载
 def downloader(url, path):
-
     headers = {
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-            'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36'
-        }
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+        'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36'
+    }
 
     start = time.time()
     size = 0
@@ -21,16 +22,19 @@ def downloader(url, path):
     content_size = int(response.headers['content-length'])
 
     if response.status_code == 200:
-        print('文件大小：%0.2f MB' % (content_size / chunk_size /1024))
+        ('文件大小：%0.2f MB' % (content_size / chunk_size / 1024))
         with open(path, 'wb') as file:
             for data in response.iter_content(chunk_size=chunk_size):
                 file.write(data)
                 size += len(data)
 
-                print('\r' + '下载进度: %s %.2f%%' % ('#'*int(size * 50 /content_size), float(size / content_size * 100)), end='')
+                print(
+                    '\r' + '下载进度: %s %.2f%%' % ('#' * int(size * 50 / content_size), float(size / content_size * 100)),
+                    end='')
 
     end = time.time()
     print('\n' + '下载完成！用时%.2f秒' % (end - start))
+
 
 # json 文件读写
 def jsonRW(file_path, in_data):
@@ -44,8 +48,7 @@ def jsonRW(file_path, in_data):
             with open(file_path, 'w') as file:
                 json.dump(data, file, ensure_ascii=False)
                 file.write('\n')
-            print('1')
-        except Exception as e: # 读取异常，重建文件。
+        except Exception as e:  # 读取异常，重建文件。
             with open(file_path, 'w') as file:
                 json.dump(in_data, file, ensure_ascii=False)
                 file.write('\n')
@@ -74,20 +77,23 @@ else:
 # 检查 Kindle 软件更新 URL
 url = 'https://www.amazon.cn/gp/help/customer/display.html?nodeId=201756220'
 
-
-r = requests.get(url)
-m = re.search('"(https.*\.bin)".*?下载软件更新([\d\.\d\.?]{3,11})', r.text)
+response = requests.get(url)
+# m = re.search('"(https.*\.bin)".*?下载软件更新([\d\.\d\.?]{3,11})', response.text) # 旧的匹配方式
+soup = bs4.BeautifulSoup(response.text, "html5lib")
+urls = soup.select('a[href^=https://s3.amazonaws.com/firmwaredownloads/]')
+m = re.search('([\d\.\d\.?]{3,11})(\.bin)', urls[0].attrs.get('href'))
 
 if str(m) != 'None':
-    new_ver = m.group(2)
+    new_ver = m.group(1)
     if new_ver != version['kindle_version']:
-        action = input('There is a new version: ' + version['kindle_version'] + ' => ' + new_ver + ' \nNeed to mark updated. please input "M" OR download "Y" :')
+        action = input('There is a new version: ' + version[
+            'kindle_version'] + ' => ' + new_ver + ' \nNeed to mark updated. please input "M" OR download "Y" :')
         version['kindle_version'] = new_ver
         if action == 'M':
             jsonRW(data_file, version)
             print('Mark updated.')
         elif action == 'Y':
-        	# 下载更新文件……
+            # 下载更新文件……
             name = re.search('.*/(.*?\.bin)$', m.group(1))
             downloader(m.group(1), file_dir + str(name.group(1)))
             jsonRW(data_file, version)
@@ -96,4 +102,3 @@ if str(m) != 'None':
         print('No new version.')
 else:
     print('Error: No data detected!')
-
