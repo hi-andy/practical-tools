@@ -80,8 +80,8 @@ url = 'https://www.amazon.cn/gp/help/customer/display.html?nodeId=201756220'
 response = requests.get(url)
 # m = re.search('"(https.*\.bin)".*?下载软件更新([\d\.\d\.?]{3,11})', response.text) # 旧的匹配方式
 soup = bs4.BeautifulSoup(response.text, "html5lib")
-urls = soup.select('a[href^=https://s3.amazonaws.com/firmwaredownloads/]')
-m = re.search('([\d\.\d\.?]{3,11})(\.bin)', urls[0].attrs.get('href'))
+url = soup.select('a[href^=https://s3.amazonaws.com/firmwaredownloads/]')[0].attrs.get('href')
+m = re.search('([\d\.\d\.?]{3,11})(\.bin)', url)
 
 if str(m) != 'None':
     new_ver = m.group(1)
@@ -94,8 +94,8 @@ if str(m) != 'None':
             print('Mark updated.')
         elif action == 'Y':
             # 下载更新文件……
-            name = re.search('.*/(.*?\.bin)$', m.group(1))
-            downloader(m.group(1), file_dir + str(name.group(1)))
+            name = re.search('.*/(.*?\.bin)$', url)
+            downloader(url, file_dir + str(name.group(1)))
             jsonRW(data_file, version)
             print('File downloaded.')
     else:
