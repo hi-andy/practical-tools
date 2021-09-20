@@ -1,4 +1,6 @@
+#!/usr/bin/env python3
 import os
+import re
 import subprocess
 
 
@@ -12,14 +14,18 @@ def audio_convert(in_dir, out_dir='../mp3/', format='.mp3'):
 
     files = os.listdir(in_dir)
     for file in files:
-        source_file = in_dir + file
-        out_file = os.path.join(out_dir, file[0:-4] + format)
-        subprocess.call(['/usr/local/bin/ffmpeg', '-v', 'quiet', '-i', source_file, "-qscale:a", "9", out_file, '-y'])
-        break
+        match = re.match(r'.*(\d{2,}).*', file)
+        if str(match) != 'None':
+            newName = match.group(1).rjust(4, '0') + '.' + file[-2:] + format
+
+            source_file = in_dir + file
+            out_file = os.path.join(out_dir, newName)
+            subprocess.call(['/usr/local/bin/ffmpeg', '-v', 'quiet', '-i', source_file, "-qscale:a", "9", out_file, '-y'])
+            break
 
 
 # 文件目录
-file_in = '/Volumes/Samsung/m4a/'
-file_out = '/Users/hua/mp3/'
+file_in = '/Users/andy/Downloads/guan2/'
+file_out = '/Users/andy/Downloads/newGuan/'
 
 audio_convert(file_in, file_out)
